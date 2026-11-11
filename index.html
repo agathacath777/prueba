@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misión Secreta: El Archivo</title>
+    <style>
+        /* --- ESTILOS GENERALES Y RESET --- */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Georgia', serif;
+            color: #d4af37;
+        }
+
+        /* --- FASE 1: CONTENEDOR TELÓN Y ESCENARIO --- */
+        #seccion-telon, #seccion-oficina, #menu-intermedio {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #escenario {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #050505;
+        }
+
+        .capa {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+        }
+
+        #video-telon {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 10;
+            display: none;
+        }
+
+        #zona-boton-6 {
+            position: absolute;
+            z-index: 15;
+            width: 40px;
+            height: 40px;
+            top: 31%;
+            left: 49%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            display: none;
+            border-radius: 50%;
+            background: rgba(255, 0, 0, 0.0);
+            border: 1px dashed rgba(212, 175, 55, 0.2);
+        }
+
+        #menu-inicial {
+            position: absolute;
+            z-index: 20;
+            text-align: center;
+            color: #d4af37;
+            background: rgba(15, 8, 4, 0.95);
+            padding: 30px 40px;
+            border: 3px double #d4af37;
+            box-shadow: 0 0 20px rgba(0,0,0,0.9);
+            border-radius: 4px;
+        }
+
+        #dialogo-box {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 650px;
+            background: #fffef0;
+            border: 4px solid #5d4037;
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 30;
+            display: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #3e2723;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+            line-height: 1.4;
+        }
+
+        .btn-elegante {
+            background: #3e2723;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        .btn-elegante:hover {
+            background: #5d4037;
+            color: #fff;
+            box-shadow: 0 0 10px #d4af37;
+        }
+
+        /* --- FASE INTERMEDIA --- */
+        #menu-intermedio {
+            display: none;
+            z-index: 10000;
+            background: #000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .opciones-box {
+            background: rgba(20, 10, 5, 0.95);
+            padding: 40px 60px;
+            border: 3px double #d4af37;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+        }
+
+        /* --- FASE 2: LA OFICINA NOIR --- */
+        :root {
+            --gold: #d4c9a8;
+            --brown: #8b4513;
+        }
+
+        #seccion-oficina {
+            display: none;
+            background: #0a0a0a url("https://static.vecteezy.com/system/resources/previews/001/900/919/non_2x/dark-wood-texture-antique-background-panels-free-photo.jpg") center/cover fixed;
+            font-family: "Courier New", monospace;
+            color: var(--gold);
+        }
+
+        #seccion-oficina.ira {
+            background-color: #400 !important;
+            filter: sepia(1) contrast(1.4) saturate(2.5) hue-rotate(-20deg);
+            animation: pulseIra 0.2s infinite alternate;
+        }
+
+        @keyframes pulseIra {
+            0% { filter: sepia(1) contrast(1.4) saturate(2.5); }
+            100% { filter: sepia(1) contrast(1.8) saturate(3) brightness(0.8); }
+        }
+
+        #light-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle 320px at var(--v-x, 50%) var(--v-y, 50%), transparent 10%, rgba(0,0,0,0.96) 80%);
+            z-index: 2;
+            mix-blend-mode: multiply;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        #dust {
+            position: fixed;
+            inset: 0;
+            background: url("https://media.tenor.com/6zv1Z1xQe9AAAAAi/dust-particles.gif") center/cover;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .objeto {
+            position: absolute;
+            cursor: grab;
+            z-index: 10;
+            touch-action: none;
+        }
+
+        .objeto:active {
+            cursor: grabbing;
+        }
+
+        .papel {
+            width: 220px;
+            padding: 18px;
+            background: #f5e8c7;
+            color: #2b1b0f;
+            border: 1px solid #8b6f47;
+            box-shadow: 5px 5px 15px rgba(0,0,0,.8);
+            white-space: pre-wrap;
+            font-weight: bold;
+        }
+
+        .folder {
+            width: 150px;
+            text-align: center;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .folder img {
+            width: 100%;
+            filter: drop-shadow(5px 5px 8px black);
+        }
+
+        /* VELA Y LLAMA */
+        #candle-box {
+            width: 60px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: pointer;
+        }
+
+        #vela {
+            width: 30px;
+            height: 60px;
+            background: #3d0000;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            box-shadow: inset -5px 0 10px #1a0000, 0 4px 10px rgba(0,0,0,0.8);
+        }
+
+        .llama {
+            width: 14px;
+            height: 22px;
+            background: #ff9d00;
+            border-radius: 50% 50% 20% 20%;
+            margin-bottom: 2px;
+            filter: blur(0.5px);
+            animation: flicker 0.1s infinite alternate;
+            box-shadow: 0 0 18px #ff5e00, 0 0 35px #ff9d00;
+        }
+
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(-1deg); opacity: 0.85; }
+            100% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+        }
+
+        /* MENÚS CONTEXTUALES Y POPUPS */
+        .menu-popup {
+            position: fixed;
+            background: #111;
+            border: 1px solid var(--brown);
+            display: none;
+            z-index: 10000;
+            box-shadow: 0 0 15px black;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .menu-popup button {
+            background: none;
+            border: none;
+            color: var(--gold);
+            padding: 10px 18px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #222;
+        }
+
+        .menu-popup button:hover {
+            background: #2a1508;
+            color: #fff;
+        }
+
+        /* MODAL DE LECTURA Y DIÁLOGOS */
+        #modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            z-index: 20000;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #modal-content {
+            max-width: 650px;
+            width: 90%;
+            margin: 5% auto;
+            background: #1a1a1a;
+            border: 2px solid var(--brown);
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0,0,0,0.9);
+            border-radius: 6px;
+        }
+
+        #modal-text {
+            line-height: 1.6;
+            min-height: 60px;
+            white-space: pre-wrap;
+            font-size: 1.05rem;
+        }
+
+        #close-modal {
+            position: absolute;
+            top: 8px;
+            right: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--gold);
+        }
+
+        #close-modal:hover {
+            color: #fff;
+        }
+
+        #phone-ring {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #5a0000;
+            color: white;
+            border: 2px solid var(--gold);
+            padding: 15px 25px;
+            cursor: pointer;
+            z-index: 1000;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(255,0,0,0.5);
+            animation: ring 0.3s infinite alternate;
+        }
+
+        @keyframes ring {
+            from { transform: rotate(-6deg) scale(1); }
+            to { transform: rotate(6deg) scale(1.05); }
+        }
+
+        #vol-ctrl {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 10000;
+            background: rgba(10, 10, 10, 0.85);
+            padding: 10px 15px;
+            border: 1px solid var(--brown);
+            font-size: 11px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        #vol-ctrl input {
+            cursor: pointer;
+            accent-color: var(--gold);
+        }
+
+        .modal-img {
+            display: block;
+            margin: 15px auto;
+            max-width: 80%;
+            max-height: 250px;
+            object-fit: contain;
+            border: 2px solid var(--brown);
+            box-shadow: 0 0 10px #000;
+        }
+    </style>
+</head>
+<body>
+
+<!-- FASE 1: ESCENARIO TELÓN -->
+<div id="seccion-telon">
+    <div id="escenario">
+        <img id="img-fondo" src="https://i.imgur.com/M72nlga.png" class="capa" style="display:none;" alt="Fondo Telón Escenario">
+        <img id="capa-telon-estatica" src="https://i.imgur.com/q1F5WnA.png" class="capa" alt="Telón Cerrado">
+        <video id="video-telon" playsinline preload="auto"></video>
+        
+        <div id="zona-boton-6" onclick="presionarSeis()"></div>
+        
+        <div id="menu-inicial">
+            <h2 style="margin-top:0;">¿Desea abrir el telón?</h2>
+            <button class="btn-elegante" onclick="iniciarExperiencia()">SÍ</button>
+        </div>
+        
+        <div id="dialogo-box"></div>
+    </div>
+    
+    <audio id="audio-telefono" loop src="https://www.dropbox.com/scl/fi/p1ql2ps0ryk3v5v1qonks/freesound_community-1930awaphoneringing-68948.mp3?rlkey=uyt9nrhnjiwjrr9yi97fesnu9&st=j37uz90j&raw=1"></audio>
+    <audio id="audio-exito" src="https://www.dropbox.com/scl/fi/bcp19b0wqt4xmhdgov30o/freesound_community-dial-112-38521.mp3?rlkey=ar175zkcxm9c3hqqvjklqf27p&st=t4bz7g33&raw=1"></audio>
+</div>
+
+<!-- FASE INTERMEDIA -->
+<div id="menu-intermedio">
+    <div class="opciones-box">
+        <h2 id="pregunta-intermedia">¿Quieres entrar?</h2>
+        <button class="btn-elegante" onclick="decidirEntrar(true)">SÍ</button>
+        <button class="btn-elegante" onclick="decidirEntrar(false)">NO</button>
+    </div>
+</div>
+
+<!-- FASE 2: LA OFICINA NOIR -->
+<div id="seccion-oficina">
+    <div id="light-overlay"></div>
+    <div id="dust"></div>
+    
+    <div id="vol-ctrl">
+        VOLUMEN<br>
+        <input type="range" id="slider-vol" min="0" max="1" step="0.05" value="0.5" oninput="setGlobalVolume(this.value)">
+    </div>
+    
+    <audio id="bgm" loop></audio>
+    <audio id="ringtone" src="https://cdn.freesound.org/previews/22/22603_78365-lq.mp3" loop></audio>
+    
+    <!-- OBJETOS EN LA OFICINA -->
+    <div class="objeto" id="candle-obj" style="top:45%; right:18%;" onclick="toggleLight()">
+        <div id="candle-box">
+            <div class="llama" id="llama"></div>
+            <div id="vela"></div>
+        </div>
+    </div>
+    
+    <div class="objeto" id="cigarro" style="top:12%; right:12%; width:140px;" data-tipo="cigarro" data-pitch="0.7">
+        <img src="https://media.tenor.com/v3kn5pZZfLUAAAAi/marlboro.gif" width="100%" alt="Cigarros" draggable="false">
+    </div>
+    
+    <div class="papel objeto" id="nota-obj" style="top:32%; left:28%;" data-tipo="nota" data-pitch="1.0">
+MURKOFF CORP
+REAGENT #1622
+    </div>
+    
+    <div class="objeto" id="lipstick" style="bottom:20%; left:35%; width:60px;" data-tipo="lipstick" data-pitch="1.4">
+        <img src="https://www.perthnow.com.au/stories/swift-sparks-adele-rumour-after-moving-album-forward/assets/12.gif" width="100%" alt="Labial" draggable="false">
+    </div>
+    
+    <div class="objeto" id="vinyl-obj" style="bottom:12%; left:48%; width:150px;" data-tipo="vinilo">
+        <img src="https://media.tenor.com/bSIsWKMhV6YAAAAj/disco.gif" width="100%" alt="Vinilo" draggable="false">
+    </div>
+    
+    <div class="objeto" id="phone-obj" style="bottom:18%; left:12%; width:110px;" data-tipo="telefono" data-pitch="0.6">
+        <img src="https://pngimg.com/uploads/phone/phone_PNG49033.png" width="100%" style="filter: brightness(0.6) sepia(1);" alt="Teléfono" draggable="false">
+    </div>
+    
+    <div class="folder objeto" id="folder-obj" style="top:18%; left:8%;" data-tipo="diario" data-pitch="0.9">
+        <img src="https://static.vecteezy.com/system/resources/previews/054/952/817/non_2x/vintage-file-folders-stacked-on-a-transparent-background-showcasing-aged-paper-quality-and-rustic-charm-a-vintage-file-folders-transparent-background-free-png.png" style="filter: grayscale(1) brightness(0.6);" alt="Diario" draggable="false">
+        <span>Diario de Luci</span>
+    </div>
+    
+    <!-- MENÚS Y DIÁLOGOS DE OFICINA -->
+    <div id="menu" class="menu-popup"></div>
+    
+    <div id="vinyl-menu" class="menu-popup">
+        <button onclick="playTrack(1)">🎷 Three O'Clock Blues</button>
+        <button onclick="playTrack(2)">🎺 Rare Armstrong Perf.</button>
+        <button onclick="playTrack(3)">🎤 Boy from New Orleans</button>
+        <button onclick="stopTrack()">⏹️ Detener Música</button>
+    </div>
+    
+    <div id="modal">
+        <div id="modal-content">
+            <span id="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modal-text"></div>
+        </div>
+    </div>
+    
+    <div id="phone-ring" onclick="pickPhone()">📞 Responder Teléfono</div>
+</div>
+
+<script>
+    /* --- AUDIO CONTEXT GLOBAL & SINTETIZADOR BEEP --- */
+    let audioCtx = null;
+    let globalVol = 0.5;
+
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function rpgBeep(freq = 700) {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = "square";
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.02 * globalVol, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    /* --- LOGICA FASE 1: EL TELÓN --- */
+    const video = document.getElementById('video-telon');
+    const estatica = document.getElementById('capa-telon-estatica');
+    const menuInicial = document.getElementById('menu-inicial');
+    const fondo = document.getElementById('img-fondo');
+    const audioTelefono = document.getElementById('audio-telefono');
+    const audioExito = document.getElementById('audio-exito');
+    const cuadroTexto = document.getElementById('dialogo-box');
+    const zonaBoton = document.getElementById('zona-boton-6');
+
+    let contadorSeis = 0;
+    let llamadaContestada = false;
+
+    function iniciarExperiencia() {
+        initAudioContext();
+        menuInicial.style.display = 'none';
+        video.style.display = 'block';
+        video.src = "https://i.imgur.com/Aj9PxX8.mp4";
+        video.play().catch(err => {
+            console.log("Error al reproducir video, saltando al fondo:", err);
+            finalizarVideoTelon();
+        });
+
+        video.onended = finalizarVideoTelon;
+    }
+
+    function finalizarVideoTelon() {
+        video.style.display = 'none';
+        estatica.style.display = 'none';
+        fondo.style.display = 'block';
+        audioTelefono.volume = globalVol;
+        audioTelefono.play().catch(() => {});
+    }
+
+    // Doble Clic para contestar llamada en el escenario
+    fondo.addEventListener('dblclick', () => {
+        if (!llamadaContestada) {
+            llamadaContestada = true;
+            audioTelefono.pause();
+            fondo.src = "https://i.imgur.com/QzIj4jB.png";
+            zonaBoton.style.display = 'block';
+            escribirDialogoTelon("Ah... ¿Tú eres el agente que quiere pasar? ugh bien ya sabes qué hacer, solo llámame...");
+        }
+    });
+
+    function presionarSeis() {
+        if (llamadaContestada && contadorSeis < 3) {
+            contadorSeis++;
+            rpgBeep(600);
+            if (contadorSeis === 3) {
+                audioExito.volume = globalVol;
+                audioExito.play().catch(() => {});
+                zonaBoton.style.display = 'none';
+                escribirDialogoTelon("Ah... si pudiste entrar, bueno supongo que... no sé solo ponte cómodo, o lo que sea, solo pasa y no toques nada.", () => {
+                    setTimeout(mostrarMenuIntermedio, 2000);
+                });
+            }
+        }
+    }
+
+    function escribirDialogoTelon(texto, callback) {
+        cuadroTexto.style.display = 'block';
+        cuadroTexto.innerHTML = "";
+        let i = 0;
+        const intervalo = setInterval(() => {
+            if (i < texto.length) {
+                cuadroTexto.innerHTML += texto.charAt(i);
+                if (texto.charAt(i) !== ' ') rpgBeep(600);
+                i++;
+            } else {
+                clearInterval(intervalo);
+                if (callback) callback();
+            }
+        }, 55);
+    }
+
+    /* --- TRANSICIÓN A FASE INTERMEDIA --- */
+    function mostrarMenuIntermedio() {
+        document.getElementById('seccion-telon').style.display = 'none';
+        document.getElementById('menu-intermedio').style.display = 'flex';
+    }
+
+    function decidirEntrar(si) {
+        initAudioContext();
+        if (si) {
+            document.getElementById('menu-intermedio').style.display = 'none';
+            document.getElementById('seccion-oficina').style.display = 'block';
+            iniciarOficina();
+        } else {
+            document.getElementById('pregunta-intermedia').innerText = "Entonces no estés jodiendo, bye.";
+            setTimeout(() => { location.reload(); }, 2000);
+        }
+    }
+
+    /* --- LOGICA FASE 2: LA OFICINA NOIR --- */
+    const clickCounts = {};
+    const genericAnnoyed = [
+        "Oye, consíguete una vida.",
+        "En lugar de estar de metiche deberías ir a tocar algo de pasto.",
+        "Las damitas deberíamos conservar uno que otro secreto para nosotras mismas."
+    ];
+
+    const dialogos = {
+        lipstick: [
+            "Uhum, rojo puta... Un día debería usárselo al emplumado ese cuando se duerma. Seguro le queda de muerte, o más puta.",
+            "Humm, ¿los labiales caducan? Meh, a quién le importa.",
+            "Me pregunto si el fuego infernal sirve para retocar el maquillaje. Ahorraría una fortuna."
+        ],
+        cigarro: [
+            "Este olor me recuerda al desgraciado del abrigo de lana... Me dan ganas de apagarlo en su alfombra nueva.",
+            "Fumar es malo para la salud, dicen. Cariño, tengo alas negras y cuernos, el cáncer es el menor de mis problemas.",
+            "A veces el humo forma figuras... La otra vez vi la cara de Zariel llorando. Fue el mejor cigarro de mi vida."
+        ],
+        nota: [
+            "¿Reagent 1622? Suena a nombre de perfume barato de supermercado. Prefiero 'Lucifer', impone más.",
+            "El expediente dice que tengo 'tendencias destructivas'. ¡Pues claro! Si me engañas con una elfa desabrida, no esperes galletas.",
+            "Alguien escribió esto con mucha seriedad. Pobres diablos, no aguantarían ni media hora en el Velvet Nocturne."
+        ],
+        diario: [
+            "Hoy aprendí a hacer pipí parada sin ensuciar el satín. *Dibujo de un tipo meando*. Es una ventaja táctica de ser 'más alta'.",
+            "Ya aprendí a manejar mejor las alas que ese ángel caído... ¿Eh? ¿Espera, que no puedo decir ÁNGEL CAÍDO en voz alta? ¡Uy, disculpa!",
+            "HTML_IMG_ZARIEL_¡Al fin logré tomarle una foto! Humm, ¡¿de qué se queja ese maldito?! ¡Si ahora tiene un CULOTE y un par de tremendas tetas! Debería darme las gracias."
+        ],
+        telefono: [
+            "¿Diga? ¿Es la pizzería? Ah, no, es el vacío existencial llamando de nuevo. Pásame con el gerente.",
+            "Si es el del abrigo de lana pidiendo perdón, dile que estoy ocupada contando mis plumas nuevas.",
+            "A veces suena y solo escucho estática... o quizás es el ángel quejándose porque le robé el shampoo."
+        ],
+        vinilo: [
+            "Esta canción me gustaba hasta que me di cuenta de que el ritmo combinaba con sus mentiras.",
+            "Poner música ayuda a no escuchar los gritos de Zariel cuando se mira al espejo. ¡Pobrecita, tan divina y tan humana!",
+            "Si vuelvo a abrir un club, la primera regla será: prohibido cantar baladas de amor. Solo jazz sucio."
+        ]
+    };
+
+    let chaosLevel = 0;
+    let moveCounter = 0;
+    let canMove = true;
+    const initialPositions = [];
+
+    function iniciarOficina() {
+        document.querySelectorAll(".objeto").forEach(el => {
+            initialPositions.push({ el: el, top: el.style.top, left: el.style.left });
+            clickCounts[el.id] = 0;
+            configurarDragAndDrop(el);
+        });
+
+        // Configurar luz inicial en la vela
+        const candle = document.getElementById("candle-obj");
+        actualizarLuzOverlay(candle);
+
+        setTimeout(() => {
+            document.getElementById("phone-ring").style.display = "block";
+            const ringtone = document.getElementById("ringtone");
+            ringtone.volume = globalVol;
+            ringtone.play().catch(() => {});
+        }, 3000);
+    }
+
+    function resetObjects() {
+        initialPositions.forEach(pos => {
+            pos.el.style.transition = "all 0.8s ease";
+            pos.el.style.top = pos.top;
+            pos.el.style.left = pos.left;
+            setTimeout(() => pos.el.style.transition = "none", 800);
+        });
+    }
+
+    function setGlobalVolume(v) {
+        globalVol = parseFloat(v);
+        document.getElementById("bgm").volume = globalVol;
+        document.getElementById("ringtone").volume = globalVol;
+        document.getElementById("audio-telefono").volume = globalVol;
+        document.getElementById("audio-exito").volume = globalVol;
+    }
+
+    // Actualiza la posición de la linterna/luz radial
+    function actualizarLuzOverlay(el) {
+        const rect = el.getBoundingClientRect();
+        document.documentElement.style.setProperty('--v-x', (rect.left + rect.width / 2) + 'px');
+        document.documentElement.style.setProperty('--v-y', (rect.top + rect.height / 3) + 'px');
+    }
+
+    document.addEventListener("mousemove", () => {
+        const candle = document.getElementById("candle-obj");
+        if (candle) actualizarLuzOverlay(candle);
+    });
+
+    function toggleLight() {
+        const overlay = document.getElementById("light-overlay");
+        const llama = document.getElementById("llama");
+        if (llama.style.visibility === "hidden") {
+            llama.style.visibility = "visible";
+            overlay.style.opacity = "1";
+        } else {
+            llama.style.visibility = "hidden";
+            overlay.style.opacity = "0.2";
+        }
+    }
+
+    /* --- SISTEMA DRAG & DROP UNIFICADO (MOUSE + TOUCH) --- */
+    function configurarDragAndDrop(el) {
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        const onStart = (e) => {
+            if (!canMove) return;
+            isDragging = true;
+            el.style.zIndex = 100;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            startX = clientX;
+            startY = clientY;
+            initialLeft = el.offsetLeft;
+            initialTop = el.offsetTop;
+
+            moveCounter++;
+            if (moveCounter > 20) {
+                triggerChaos();
+                moveCounter = 0;
+            }
+        };
+
+        const onMove = (e) => {
+            if (!isDragging || !canMove) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+
+            el.style.left = (initialLeft + deltaX) + "px";
+            el.style.top = (initialTop + deltaY) + "px";
+        };
+
+        const onEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            el.style.zIndex = 10;
+        };
+
+        el.addEventListener("mousedown", onStart);
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onEnd);
+
+        el.addEventListener("touchstart", onStart, { passive: true });
+        document.addEventListener("touchmove", onMove, { passive: true });
+        document.addEventListener("touchend", onEnd);
+
+        el.addEventListener("dblclick", (e) => {
+            e.stopPropagation();
+            openMenu(e, el);
+        });
+    }
+
+    /* --- SISTEMA DE CAOS / MODO IRA --- */
+    function triggerChaos() {
+        chaosLevel++;
+        resetObjects();
+        let msg = "";
+        let pitch = 1.0;
+
+        switch(chaosLevel) {
+            case 1: msg = "Tchh... ¿no te enseñaron a no tocar cosas ajenas?"; break;
+            case 2: msg = "No trates de ordenar lo innombrable."; pitch = 0.8; break;
+            case 3: msg = "Cada objeto tiene un peso que tu alma no podría soportar."; pitch = 0.7; break;
+            case 4: msg = "La curiosidad es el primer paso hacia la terapia de choque."; pitch = 0.6; break;
+            case 5: msg = "DETENTE. ESTO NO ES UN JUEGO."; pitch = 0.5; break;
+            case 6: 
+                msg = "YA TE ADVERTÍ.\nAHORA MIRA LO QUE HAS HECHO."; 
+                pitch = 0.3;
+                canMove = false;
+                document.getElementById('seccion-oficina').classList.add("ira");
+                document.getElementById("close-modal").style.display = "none";
+                leerNota(msg, pitch, 90); 
+                return;
+        }
+        leerNota(msg, pitch);
+    }
+
+    /* --- MENÚ CONTEXTUAL --- */
+    function openMenu(e, el) {
+        initAudioContext();
+        const menu = document.getElementById("menu");
+        menu.innerHTML = "";
+        const tipo = el.dataset.tipo;
+        const pitch = el.dataset.pitch || 1.0;
+
+        if (tipo === "vinilo") {
+            menu.innerHTML = `
+                <button onclick="toggleVinylMenu()">💿 Tocar música</button>
+                <button onclick="handleObjectClick('${el.id}', '${tipo}', ${pitch})">📄 Ver objeto</button>
+            `;
+        } else if (tipo === "telefono") {
+            menu.innerHTML = `<button onclick="handleObjectClick('${el.id}', '${tipo}', ${pitch})">📞 Interactuar</button>`;
+        } else {
+            const label = (tipo === "diario") ? "🗂️ Abrir diario" : "📄 Leer / Ver";
+            menu.innerHTML = `<button onclick="handleObjectClick('${el.id}', '${tipo}', ${pitch})">${label}</button>`;
+        }
+
+        const x = e.clientX || (e.touches ? e.touches[0].clientX : 100);
+        const y = e.clientY || (e.touches ? e.touches[0].clientY : 100);
+
+        menu.style.left = x + "px";
+        menu.style.top = y + "px";
+        menu.style.display = "block";
+    }
+
+    function handleObjectClick(id, tipo, pitch) {
+        clickCounts[id] = (clickCounts[id] || 0) + 1;
+        let msg = "";
+        const count = clickCounts[id];
+
+        if (count <= 3) {
+            msg = dialogos[tipo][count - 1];
+        } else {
+            msg = genericAnnoyed[(count - 4) % genericAnnoyed.length];
+        }
+        leerNota(msg, pitch);
+    }
+
+    document.addEventListener("click", (e) => {
+        const menu = document.getElementById("menu");
+        if (!e.target.closest('#menu') && !e.target.closest('.objeto')) {
+            menu.style.display = "none";
+        }
+    });
+
+    function toggleVinylMenu() {
+        document.getElementById("menu").style.display = "none";
+        const v = document.getElementById("vinyl-menu");
+        v.style.left = "50%";
+        v.style.top = "50%";
+        v.style.transform = "translate(-50%, -50%)";
+        v.style.display = (v.style.display === "block") ? "none" : "block";
+    }
+
+    /* --- SISTEMA TYPEWRITER Y MODAL --- */
+    let typeTimer;
+
+    function leerNota(t, p, speed = 40) {
+        document.getElementById("modal").style.display = "flex";
+        const box = document.getElementById("modal-text");
+        box.innerHTML = "";
+
+        if (t.includes("HTML_IMG_ZARIEL_")) {
+            const cleanText = t.replace("HTML_IMG_ZARIEL_", "");
+            const img = document.createElement("img");
+            img.src = "https://i.pinimg.com/736x/53/fd/3b/53fd3b4746bdfbfe7ad78900dfc835f3.jpg";
+            img.className = "modal-img";
+            img.alt = "Fotografía de Zariel";
+            box.appendChild(img);
+            typeText(cleanText, p, speed);
+        } else {
+            typeText(t, p, speed);
+        }
+    }
+
+    function closeModal() {
+        if (chaosLevel < 6) {
+            document.getElementById("modal").style.display = "none";
+        }
+    }
+
+    function typeText(text, pitch, speed) {
+        const box = document.getElementById("modal-text");
+        clearInterval(typeTimer);
+
+        let i = 0;
+        const rawText = text.replace(/\\n/g, "\n");
+
+        typeTimer = setInterval(() => {
+            if (i < rawText.length) {
+                const char = rawText[i];
+                const span = document.createElement("span");
+                span.textContent = char;
+                box.appendChild(span);
+                
+                if (char !== " " && char !== "\n") {
+                    rpgBeep(700 * pitch);
+                }
+                i++;
+            } else {
+                clearInterval(typeTimer);
+            }
+        }, speed);
+    }
+
+    /* --- TOCADISCOS Y TRACKS --- */
+    function playTrack(n) {
+        const a = document.getElementById("bgm");
+        const tracks = [
+            "",
+            "https://dn720308.ca.archive.org/0/items/78_three-oclock-blues-tristezas-a-las-300_vic-meyers-and-his-orchestra-gordon-meye_gbia0407051b/Three%20O%27Clock%20Blues%20%28Triste%20-%20Vic%20Meyers%20and%20His%20Orchestra.mp3",
+            "https://dn720302.ca.archive.org/0/items/armstrong-louis-1924-29-rare-and-unreleased-performances-disc-1-blp-cr-04_202107/Armstrong%2C%20Louis%20%281954-61%29%20-%20Rare%20and%20Unreleased%20Performances%20disc%204%20%28BLP%29-cr-04.mp3",
+            "https://dn721607.ca.archive.org/0/items/louis-armstrong-atention-amiga-855484-side-a/04%20-%20Louis%20ARMSTRONG%20-%20Attention%20-%20Amiga%20855484%20-%20Side%20A%20-%20Boy%20from%20New%20Orleans.mp3"
+        ];
+        a.src = tracks[n];
+        a.volume = globalVol;
+        a.play().catch(e => console.log("Error de reproducción audio:", e));
+        document.getElementById("vinyl-menu").style.display = "none";
+    }
+
+    function stopTrack() {
+        document.getElementById("bgm").pause();
+        document.getElementById("vinyl-menu").style.display = "none";
+    }
+
+    function pickPhone(p = 0.6) {
+        document.getElementById("ringtone").pause();
+        document.getElementById("phone-ring").style.display = "none";
+        handleObjectClick('phone-obj', 'telefono', p);
+    }
+</script>
+</body>
+</html>
